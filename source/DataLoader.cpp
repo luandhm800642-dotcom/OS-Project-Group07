@@ -3,7 +3,7 @@
 #include <sstream>
 #include <vector>
 #include "Process.h"
-#include "DataLoader"
+#include "DataLoader.h"
 using namespace std;
 
 vector<Process> readInputCSV(const string& filename) {
