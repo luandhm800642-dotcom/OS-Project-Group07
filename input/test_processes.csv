@@ -1,1 +1,5 @@
-
+PID,ArrivalTime,BurstTime
+1,0,5
+2,1,3
+3,2,8
+4,4,6
