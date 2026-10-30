@@ -4,7 +4,9 @@
 #include <fstream>
 #include <algorithm>
 
-void MetricsAndGantt::calculateMetrics(std::vector<Process>& processes, 
+using namespace std;
+
+void MetricsAndGantt::calculateMetrics(vector<Process>& processes,
                                        double& avgWT, double& avgTAT, double& avgRT) {
     if (processes.empty()) {
         avgWT = avgTAT = avgRT = 0.0;
@@ -30,13 +32,13 @@ void MetricsAndGantt::calculateMetrics(std::vector<Process>& processes,
     avgRT  = static_cast<double>(totalRT) / n;
 }
 
-std::vector<GanttSegment> MetricsAndGantt::buildGanttSegments(const std::vector<Process>& scheduledProcesses) {
-    std::vector<GanttSegment> segments;
+vector<GanttSegment> MetricsAndGantt::buildGanttSegments(const vector<Process>& scheduledProcesses) {
+    vector<GanttSegment> segments;
     if (scheduledProcesses.empty()) return segments;
 
     // Sắp xếp bản sao theo startTime tăng dần để vẽ trục thời gian chuẩn xác
-    std::vector<Process> sortedProcs = scheduledProcesses;
-    std::sort(sortedProcs.begin(), sortedProcs.end(), [](const Process& a, const Process& b) {
+    vector<Process> sortedProcs = scheduledProcesses;
+    sort(sortedProcs.begin(), sortedProcs.end(), [](const Process& a, const Process& b) {
         if (a.startTime != b.startTime)
             return a.startTime < b.startTime;
         return a.pid < b.pid;
@@ -49,7 +51,7 @@ std::vector<GanttSegment> MetricsAndGantt::buildGanttSegments(const std::vector<
             segments.push_back({"IDLE", currentTime, p.startTime});
         }
         // Chuyển pid kiểu int thành chuỗi "P" + pid (VD: P1, P2)
-        std::string procLabel = "P" + std::to_string(p.pid);
+        string procLabel = "P" + to_string(p.pid);
         segments.push_back({procLabel, p.startTime, p.completionTime});
         currentTime = p.completionTime;
     }
@@ -57,53 +59,53 @@ std::vector<GanttSegment> MetricsAndGantt::buildGanttSegments(const std::vector<
     return segments;
 }
 
-void MetricsAndGantt::displayResultTable(const std::vector<Process>& processes, 
+void MetricsAndGantt::displayResultTable(const vector<Process>& processes,
                                          double avgWT, double avgTAT, double avgRT) {
-    std::cout << "\n==================== BANG KET QUA CHI TIET ====================\n";
-    std::cout << std::left 
-              << std::setw(8)  << "PID"
-              << std::setw(10) << "Arrival"
-              << std::setw(10) << "Burst"
-              << std::setw(10) << "Start"
-              << std::setw(12) << "Completion"
-              << std::setw(12) << "Turnaround"
-              << std::setw(10) << "Waiting"
-              << std::setw(10) << "Response" << "\n";
-    std::cout << std::string(82, '-') << "\n";
+    cout << "\n==================== BANG KET QUA CHI TIET ====================\n";
+    cout << left
+         << setw(8)  << "PID"
+         << setw(10) << "Arrival"
+         << setw(10) << "Burst"
+         << setw(10) << "Start"
+         << setw(12) << "Completion"
+         << setw(12) << "Turnaround"
+         << setw(10) << "Waiting"
+         << setw(10) << "Response" << "\n";
+    cout << string(82, '-') << "\n";
 
     for (const auto& p : processes) {
-        std::string pidStr = "P" + std::to_string(p.pid);
-        std::cout << std::left 
-                  << std::setw(8)  << pidStr
-                  << std::setw(10) << p.arrivalTime
-                  << std::setw(10) << p.burstTime
-                  << std::setw(10) << p.startTime
-                  << std::setw(12) << p.completionTime
-                  << std::setw(12) << p.turnaroundTime
-                  << std::setw(10) << p.waitingTime
-                  << std::setw(10) << p.responseTime << "\n";
+        string pidStr = "P" + to_string(p.pid);
+        cout << left
+             << setw(8)  << pidStr
+             << setw(10) << p.arrivalTime
+             << setw(10) << p.burstTime
+             << setw(10) << p.startTime
+             << setw(12) << p.completionTime
+             << setw(12) << p.turnaroundTime
+             << setw(10) << p.waitingTime
+             << setw(10) << p.responseTime << "\n";
     }
 
-    std::cout << std::string(82, '-') << "\n";
-    std::cout << std::fixed << std::setprecision(2);
-    std::cout << "-> Average Waiting Time (WT)     : " << avgWT << "\n";
-    std::cout << "-> Average Turnaround Time (TAT) : " << avgTAT << "\n";
-    std::cout << "-> Average Response Time (RT)    : " << avgRT << "\n";
+    cout << string(82, '-') << "\n";
+    cout << fixed << setprecision(2);
+    cout << "-> Average Waiting Time (WT)     : " << avgWT << "\n";
+    cout << "-> Average Turnaround Time (TAT) : " << avgTAT << "\n";
+    cout << "-> Average Response Time (RT)    : " << avgRT << "\n";
 }
 
-void MetricsAndGantt::renderGanttChart(const std::vector<GanttSegment>& ganttSegments) {
+void MetricsAndGantt::renderGanttChart(const vector<GanttSegment>& ganttSegments) {
     if (ganttSegments.empty()) {
-        std::cout << "\n[!] Khong co du lieu de ve bieu do Gantt.\n";
+        cout << "\n[!] Khong co du lieu de ve bieu do Gantt.\n";
         return;
     }
 
-    std::cout << "\n========================= BIEU DO GANTT =========================\n";
+    cout << "\n========================= BIEU DO GANTT =========================\n";
 
     // Tính độ rộng hiển thị của từng ô dựa trên thời gian chạy
-    std::vector<int> widths;
+    vector<int> widths;
     for (const auto& seg : ganttSegments) {
         int duration = seg.endTime - seg.startTime;
-        int width = std::max(6, duration * 2);
+        int width = max(6, duration * 2);
         if (static_cast<int>(seg.label.length()) + 2 > width) {
             width = static_cast<int>(seg.label.length()) + 2;
         }
@@ -111,45 +113,45 @@ void MetricsAndGantt::renderGanttChart(const std::vector<GanttSegment>& ganttSeg
     }
 
     // 1. Vẽ viền trên
-    std::cout << " ";
+    cout << " ";
     for (int w : widths) {
-        std::cout << std::string(w, '-') << " ";
+        cout << string(w, '-') << " ";
     }
-    std::cout << "\n|";
+    cout << "\n|";
 
     // 2. In nhãn tiến trình căn giữa trong từng ô
     for (size_t i = 0; i < ganttSegments.size(); ++i) {
         int w = widths[i];
-        std::string label = ganttSegments[i].label;
+        string label = ganttSegments[i].label;
         int padLeft = (w - static_cast<int>(label.length())) / 2;
         int padRight = w - static_cast<int>(label.length()) - padLeft;
-        std::cout << std::string(padLeft, ' ') << label << std::string(padRight, ' ') << "|";
+        cout << string(padLeft, ' ') << label << string(padRight, ' ') << "|";
     }
-    std::cout << "\n ";
+    cout << "\n ";
 
     // 3. Vẽ viền dưới
     for (int w : widths) {
-        std::cout << std::string(w, '-') << " ";
+        cout << string(w, '-') << " ";
     }
-    std::cout << "\n";
+    cout << "\n";
 
     // 4. In dòng thời gian (Timeline) thẳng hàng với vách ngăn '|'
-    std::cout << ganttSegments[0].startTime;
+    cout << ganttSegments[0].startTime;
     for (size_t i = 0; i < ganttSegments.size(); ++i) {
-        std::string prevTimeStr = std::to_string(ganttSegments[i].startTime);
-        std::string nextTimeStr = std::to_string(ganttSegments[i].endTime);
-        
+        string prevTimeStr = to_string(ganttSegments[i].startTime);
+        string nextTimeStr = to_string(ganttSegments[i].endTime);
+
         int spaces = widths[i] + 1 - static_cast<int>(prevTimeStr.length());
         if (spaces < 1) spaces = 1;
-        std::cout << std::string(spaces, ' ') << nextTimeStr;
+        cout << string(spaces, ' ') << nextTimeStr;
     }
-    std::cout << "\n=================================================================\n";
+    cout << "\n=================================================================\n";
 }
 
-bool MetricsAndGantt::exportToCSV(const std::string& filename, 
-                                  const std::vector<Process>& processes, 
+bool MetricsAndGantt::exportToCSV(const string& filename,
+                                  const vector<Process>& processes,
                                   double avgWT, double avgTAT, double avgRT) {
-    std::ofstream file(filename);
+    ofstream file(filename);
     if (!file.is_open()) return false;
 
     file << "PID,ArrivalTime,BurstTime,StartTime,CompletionTime,TurnaroundTime,WaitingTime,ResponseTime\n";
@@ -163,7 +165,7 @@ bool MetricsAndGantt::exportToCSV(const std::string& filename,
              << p.waitingTime << ","
              << p.responseTime << "\n";
     }
-    file << std::fixed << std::setprecision(2);
+    file << fixed << setprecision(2);
     file << "Average,,,,," << avgTAT << "," << avgWT << "," << avgRT << "\n";
 
     file.close();
